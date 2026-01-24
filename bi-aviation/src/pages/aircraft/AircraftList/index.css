@@ -1,0 +1,54 @@
+/* 页面整体容器 */
+.aircraft-list-page {
+  padding: 16px;
+  background-color: #f5f7fa;
+  min-height: 100%;
+}
+
+/* 查询区域 */
+.search-form {
+  background: #ffffff;
+  padding: 16px 16px 8px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+/* Form.Item 间距微调 */
+.search-form .ant-form-item {
+  margin-bottom: 8px;
+}
+
+/* 表格区域（CommonTable 外层） */
+.aircraft-list-page .ant-table-wrapper {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+/* 表格 header */
+.aircraft-list-page .ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-weight: 500;
+}
+
+/* Status Tag 样式优化 */
+.aircraft-list-page .ant-tag {
+  border-radius: 2px;
+  font-size: 12px;
+}
+
+/* Operation 列中的链接 */
+.aircraft-list-page a {
+  color: #1677ff;
+  cursor: pointer;
+}
+
+.aircraft-list-page a:hover {
+  text-decoration: underline;
+}
+
+/* 分页区域 */
+.aircraft-list-page .ant-pagination {
+  margin-top: 16px;
+  text-align: right;
+}
