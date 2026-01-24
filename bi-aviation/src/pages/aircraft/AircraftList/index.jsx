@@ -131,26 +131,26 @@ const AircraftList = () => {
         onFinish={handleSearch}
         className="search-form"
       >
-        <Form.Item name="registration" label="Registration">
+        <Form.Item  label="Registration">
           <Input placeholder="Enter keyword" allowClear />
         </Form.Item>
 
-        <Form.Item name="serialNumber" label="Serial Number">
+        <Form.Item  name="serialNumber" label="Serial Number">
           <Input placeholder="Enter keyword" allowClear />
         </Form.Item>
 
-        <Form.Item name="operatorCode" label="Operator Code">
+        <Form.Item  name="operatorCode" label="Operator Code">
           <Input placeholder="Enter keyword" allowClear />
         </Form.Item>
 
-        <Form.Item name="status" label="Status">
+        <Form.Item  name="status" label="Status">
           <Select placeholder="Select" allowClear style={{ width: 160 }}>
             <Option value="ACTIVE">Active</Option>
             <Option value="MAINTENANCE">Maintenance</Option>
           </Select>
         </Form.Item>
 
-        <Form.Item>
+        <Form.Item className="form-actions">
           <Space>
             <Button type="primary" htmlType="submit">
               Search

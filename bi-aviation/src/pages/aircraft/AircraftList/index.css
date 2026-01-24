@@ -8,14 +8,23 @@
 /* 查询区域 */
 .search-form {
   background: #ffffff;
-  padding: 16px 16px 8px;
-  border-radius: 4px;
-  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 16px;
+  padding-left: 16px;
 }
 
 /* Form.Item 间距微调 */
 .search-form .ant-form-item {
   margin-bottom: 8px;
+}
+/* 关键：让按钮这一项不被挤到下一行 */
+.search-form .form-actions {
+  margin-left: auto;      /* 核心 */
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 /* 表格区域（CommonTable 外层） */
