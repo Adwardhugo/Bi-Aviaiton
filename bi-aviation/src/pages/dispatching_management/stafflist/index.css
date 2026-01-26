@@ -1,0 +1,47 @@
+/* 页面整体 */
+.staff-page {
+  padding: 16px;
+  background-color: #f5f7fa;
+  min-height: 100%;
+}
+
+/* 查询区域 */
+.search-form {
+  background: #ffffff;
+  padding: 16px 16px 8px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-form .ant-form-item {
+  margin-bottom: 8px;
+}
+
+/* 搜索按钮靠右 */
+.search-form .form-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* 表格区域 */
+.staff-page .ant-table-wrapper {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+/* 操作列链接 */
+.staff-page a {
+  color: #1677ff;
+  cursor: pointer;
+}
+
+.staff-page a:hover {
+  text-decoration: underline;
+}

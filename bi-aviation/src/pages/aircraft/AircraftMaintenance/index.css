@@ -1,0 +1,54 @@
+/* 页面整体 */
+.maintenance-page {
+  padding: 16px;
+  background-color: #f5f7fa;
+  min-height: 100%;
+}
+
+/* 查询区域 */
+.search-form {
+  background: #ffffff;
+  padding: 16px 16px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-form .ant-form-item {
+  margin-bottom: 8px;
+}
+
+/* 搜索按钮靠右 */
+.search-form .form-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Add 按钮区域 */
+.add-bar {
+  padding: 16px 16px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+/* 表格容器 */
+.maintenance-page .ant-table-wrapper {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+/* Operation 链接 */
+.maintenance-page a {
+  color: #1677ff;
+  cursor: pointer;
+}
+
+.maintenance-page a:hover {
+  text-decoration: underline;
+}

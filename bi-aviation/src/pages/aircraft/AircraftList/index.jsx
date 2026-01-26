@@ -38,7 +38,7 @@ const AircraftList = () => {
     title: 'Status', 
     dataIndex: 'aircraft_status',
     render: status => (
-      <Tag color={status === 'ACTIVE' ? 'green' : 'yellow'}>
+      <Tag color={status === 'ACTIVE' ? 'green' : 'orange'}>
         {status}
       </Tag>
     ),

@@ -1,0 +1,55 @@
+/* 页面整体 */
+.schedule-page {
+  padding: 16px;
+  background-color: #f5f7fa;
+  min-height: 100%;
+}
+
+/* 查询区域 */
+.search-form {
+  background: #ffffff;
+  padding: 16px 16px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-form .ant-form-item {
+  margin-bottom: 8px;
+}
+
+/* 搜索按钮靠右 */
+.search-form .form-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Add 按钮区域 */
+.add-bar {
+  background: #ffffff;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+}
+
+/* 表格区域 */
+.schedule-page .ant-table-wrapper {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+/* 操作列链接 */
+.schedule-page a {
+  color: #1677ff;
+  cursor: pointer;
+}
+
+.schedule-page a:hover {
+  text-decoration: underline;
+}
