@@ -1,7 +1,8 @@
-import React,{ useState }from 'react'
+import React,{ useState ,useEffect}from 'react'
 import { Form, Input, Select, Button, Space, Tag } from 'antd';
 import CommonTable from '../../../components/Table';
 import { useNavigate } from 'react-router-dom';
+import { fetchAircraftList } from '../../../apis/aircraft';
 import './index.css';
 const { Option } = Select;
 
@@ -13,18 +14,27 @@ const { Option } = Select;
 /* ================= 页面组件 ================= */
 const AircraftList = () => {
   const navigate = useNavigate();
-  const handleDetail = record => {
-    navigate(`/aircraft/detail/${record.id}`);
-  };
+  const [form] = Form.useForm();
 
+/* ================= 状态管理state ================= */
+  const [dataSource, setDataSource] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
+
+
+  
   const columns = [
   {
     title: 'Registration',
-    dataIndex: 'registration_no',
+    dataIndex: 'registrationNo'
   },
   {
     title: 'Aircraft Type',
-    dataIndex: 'aircraft_type',
+    dataIndex: 'aircraftType',
   },
     {
     title: 'Manufacturer',
@@ -32,11 +42,11 @@ const AircraftList = () => {
   },
     {
     title: 'Serial number',
-    dataIndex: 'serial_number',
+    dataIndex: 'serialNumber',
   },
   {
     title: 'Status', 
-    dataIndex: 'aircraft_status',
+    dataIndex: 'aircraftStatus',
     render: status => (
       <Tag color={status === 'ACTIVE' ? 'green' : 'orange'}>
         {status}
@@ -45,93 +55,121 @@ const AircraftList = () => {
   },
     {
     title: 'Delivery date',
-    dataIndex: 'delivery_date',
+    dataIndex: 'deliveryDate',
   },
     {
     title: 'Service date',
-    dataIndex: 'in_service_date',
+    dataIndex: 'inServiceDate',
   },
     {
     title: 'Operator code',
-    dataIndex: 'operator_code',
+    dataIndex: 'operatorCode',
   },
     {
     title: 'Base airport',
-    dataIndex: 'base_airport',
+    dataIndex: 'baseAirport',
   },
   {
     title: 'Operation',
     key: 'operation',
     render: (_, record) => (
-      <a onClick={() => handleDetail(record)}>Details</a>
+      <a onClick={() => navigate(`/aircraft/detail/${record.aircraftId}`)}>
+          Details
+      </a>
     ),
   },
 ]; 
-  const data = [
-  {
-    id: 1,
-    registration_no: 'B-3001',
-    aircraft_type: 'A321',
-    manufacturer: 'Airbus',
-    serial_number: 'A321-200-001',
-    aircraft_status: 'MAINTENANCE',
-    delivery_date: '2020-01-15',
-    in_service_date: '2020-02-01',
-    operator_code: 'OP123',
-    base_airport: 'JFK',
-    
-  },
-  {
-    id: 2,
-    registration_no: 'B-3002',
-    aircraft_type: 'A321',
-    manufacturer: 'Airbus',
-    serial_number: 'A321-200-002',
-    aircraft_status: 'ACTIVE',
-    delivery_date: '2020-01-16',
-    in_service_date: '2020-02-02',
-    operator_code: 'OP124',
-    base_airport: 'LAX',
-  },
-];
-  const [form] = Form.useForm();
-  const [dataSource, setDataSource] = useState(data);
+
+//   const data = [
+//   {
+//     id: 1,
+//     registration_no: 'B-3001',
+//     aircraft_type: 'A321',
+//     manufacturer: 'Airbus',
+//     serial_number: 'A321-200-001',
+//     aircraft_status: 'MAINTENANCE',
+//     delivery_date: '2020-01-15',
+//     in_service_date: '2020-02-01',
+//     operator_code: 'OP123',
+//     base_airport: 'JFK',
+//
+//   },
+//   {
+//     id: 2,
+//     registration_no: 'B-3002',
+//     aircraft_type: 'A321',
+//     manufacturer: 'Airbus',
+//     serial_number: 'A321-200-002',
+//     aircraft_status: 'ACTIVE',
+//     delivery_date: '2020-01-16',
+//     in_service_date: '2020-02-02',
+//     operator_code: 'OP124',
+//     base_airport: 'LAX',
+//   },
+// ];
+ 
+
+  // /* 详情 */
+  // const handleDetail = record => {
+  //   navigate(`/aircraft/list/detail/${record.id}`);
+  // };
 
 
-  /* 查询 */
-  const handleSearch = values => {
-    const { registration, serialNumber, operatorCode, status } = values;
-
-    const filtered = data.filter(item => {
-      return (
-        (!registration ||
-          item.registration_no.includes(registration)) &&
-        (!serialNumber ||
-          item.serial_number.includes(serialNumber)) &&
-        (!operatorCode ||
-          item.operator_code.includes(operatorCode)) &&
-        (!status || item.aircraft_status === status)
-      );
-    });
-
-    setDataSource(filtered);
+  /* ================= 后端拉取数据 ================= */
+  const fetchList = async (params = {}) => {
+    setLoading(true);
+    try {
+      const res = await fetchAircraftList({
+        page: pagination.current,
+        size: pagination.pageSize,
+        ...params,
+      });
+      console.log('res =', res);
+      setDataSource(res.data);
+      setPagination(prev => ({
+        ...prev,
+        total: res.data.length,
+      }));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  /* 重置 */
+  /* ================= 页面首次加载 ================= */
+  useEffect(() => {
+    fetchList();
+    
+  }, [pagination.current, pagination.pageSize]);
+
+  /* ================= 搜索 ================= */
+  const handleSearch = values => {
+    setPagination(prev => ({ ...prev, current: 1 }));
+    fetchList(values);
+  };
+    /* ================= 重置 ================= */
   const handleReset = () => {
     form.resetFields();
-    setDataSource(data);
+    setPagination(prev => ({ ...prev, current: 1 }));
+    fetchList();
   };
+  /* ================= 分页变化 ================= */
+  const handleTableChange = page => {
+    setPagination(prev => ({
+      ...prev,
+      current: page.current,
+      pageSize: page.pageSize,
+    }));
+  };
+
   return (
     <div className="aircraft-list-page">
       {/* ================= 查询区域 ================= */}
       <Form
         form={form}
-        layout="inline"
         onFinish={handleSearch}
         className="search-form"
       >
-        <Form.Item  label="Registration">
+        <Form.Item  name="registration" label="Registration">
           <Input placeholder="Enter keyword" allowClear />
         </Form.Item>
 
@@ -151,24 +189,26 @@ const AircraftList = () => {
         </Form.Item>
 
         <Form.Item className="form-actions">
-          <Space>
-            <Button type="primary" htmlType="submit">
-              Search
-            </Button>
-            <Button onClick={handleReset}>Reset</Button>
-          </Space>
-        </Form.Item>
+        <Space>
+          <Button type="primary" htmlType="submit">Search</Button>
+          <Button onClick={handleReset}>Reset</Button>
+        </Space>
+      </Form.Item>
       </Form>
 
       {/* ================= 表格区域 ================= */}
       <CommonTable
         columns={columns}
         dataSource={dataSource}
-        rowKey="id"
+        loading={loading}
+        rowKey="aircraftId"
         pagination={{
-          pageSize: 10,
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
           showSizeChanger: true,
         }}
+        onChange={handleTableChange}
       />
     </div>
   );
