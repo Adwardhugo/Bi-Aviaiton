@@ -116,19 +116,19 @@ const AircraftList = () => {
 
 
   /* ================= 后端拉取数据 ================= */
-  const fetchList = async (params = {}) => {
+  const fetchList = async (params = {}, page = pagination.current, pageSize = pagination.pageSize) => {
     setLoading(true);
     try {
       const res = await fetchAircraftList({
-        page: pagination.current,
-        size: pagination.pageSize,
+        page,
+        size: pageSize,
         ...params,
       });
       console.log('res =', res);
-      setDataSource(res.data);
+      setDataSource(res.data.rows);
       setPagination(prev => ({
         ...prev,
-        total: res.data.length,
+        total: res.data.total,
       }));
     } finally {
       setLoading(false);
@@ -153,12 +153,15 @@ const AircraftList = () => {
     fetchList();
   };
   /* ================= 分页变化 ================= */
-  const handleTableChange = page => {
+  const handleTableChange = (pagination) => {
+    const {current, pageSize} = pagination;
     setPagination(prev => ({
       ...prev,
-      current: page.current,
-      pageSize: page.pageSize,
+      current,
+      pageSize,
     }));
+
+    fetchList(form.getFieldsValue(), current, pageSize);
   };
 
   return (
@@ -169,7 +172,7 @@ const AircraftList = () => {
         onFinish={handleSearch}
         className="search-form"
       >
-        <Form.Item  name="registration" label="Registration">
+        <Form.Item  name="registrationNo" label="Registration">
           <Input placeholder="Enter keyword" allowClear />
         </Form.Item>
 
@@ -181,10 +184,11 @@ const AircraftList = () => {
           <Input placeholder="Enter keyword" allowClear />
         </Form.Item>
 
-        <Form.Item  name="status" label="Status">
+        <Form.Item  name="aircraftStatus" label="Status">
           <Select placeholder="Select" allowClear style={{ width: 160 }}>
             <Option value="ACTIVE">Active</Option>
             <Option value="MAINTENANCE">Maintenance</Option>
+            <Option value="GROUNDED">Grounded</Option>
           </Select>
         </Form.Item>
 

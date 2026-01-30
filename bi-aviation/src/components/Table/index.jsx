@@ -6,6 +6,7 @@ const CommonTable = ({
   dataSource,
   rowKey = 'id',
   pagination = true,
+  onChange,
   loading = false,
 }) => {
   return (
@@ -14,6 +15,7 @@ const CommonTable = ({
       dataSource={dataSource}
       rowKey={rowKey}
       pagination={pagination}
+      onChange={onChange}
       loading={loading}
     />
   );

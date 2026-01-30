@@ -4,6 +4,7 @@ import AircraftList from "../pages/aircraft/AircraftList";
 import AircraftMaintenance from "../pages/aircraft/AircraftMaintenance";
 import Dispatchinglist from "../pages/dispatching_management/dispatchinglist";
 import Stafflist from "../pages/dispatching_management/stafflist";
+// import AircraftDetail from "../pages/aircraft/AircraftDetail";
 
 
 const router = createBrowserRouter([
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
         path: "aircraft/list",
         element: <AircraftList />
       },
+      // {
+      //   path: "aircraft/detail/:id",
+      //   element: <AircraftDetail />,
+      // },
       {
         path: "aircraft/maintenance",
         element: <AircraftMaintenance />
