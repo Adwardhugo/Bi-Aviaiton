@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.biavaitionbackend.mapper.AircraftMapper">
+
+    <select id="findAll" resultType="org.example.biavaitionbackend.pojo.Aircraft">
+        SELECT aircraft.*
+            FROM aircraft
+            WHERE 1 = 1
+              AND (#{registrationNo} IS NULL OR registration_no LIKE CONCAT('%', #{registrationNo}, '%'))
+              AND (#{serialNumber} IS NULL OR serial_number LIKE CONCAT('%', #{serialNumber}, '%'))
+              AND (#{operatorCode} IS NULL OR operator_code LIKE CONCAT('%', #{operatorCode}, '%'))
+              AND (#{aircraftStatus} IS NULL OR aircraft_status = #{aircraftStatus})
+            ORDER BY in_service_date DESC
+    </select>
+</mapper>
