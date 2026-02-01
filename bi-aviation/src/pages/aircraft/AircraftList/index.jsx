@@ -1,5 +1,5 @@
 import React,{ useState ,useEffect}from 'react'
-import { Form, Input, Select, Button, Space, Tag } from 'antd';
+import { Form, Input, Select, Button, Space, Tag, Drawer, Row, Col} from 'antd';
 import CommonTable from '../../../components/Table';
 import { useNavigate } from 'react-router-dom';
 import { fetchAircraftList } from '../../../apis/aircraft';
@@ -10,7 +10,13 @@ const { Option } = Select;
 
 
 
-
+/* ================= 详情字段组件 ================= */
+const DescriptionItem = ({ title, content }) => (
+  <div style={{ marginBottom: 12 }}>
+    <strong>{title}:</strong>
+    <span>{content ?? '-'}</span>
+  </div>
+);
 /* ================= 页面组件 ================= */
 const AircraftList = () => {
   const navigate = useNavigate();
@@ -24,6 +30,8 @@ const AircraftList = () => {
     pageSize: 10,
     total: 0,
   });
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const[currentAircraft,setCurrentAircraft]=useState(null);
 
 
   
@@ -73,7 +81,11 @@ const AircraftList = () => {
     title: 'Operation',
     key: 'operation',
     render: (_, record) => (
-      <a onClick={() => navigate(`/aircraft/detail/${record.aircraftId}`)}>
+      <a onClick={() =>
+      {
+        setCurrentAircraft(record);
+        setDrawerOpen(true);
+      }}>
           Details
       </a>
     ),
@@ -214,6 +226,34 @@ const AircraftList = () => {
         }}
         onChange={handleTableChange}
       />
+      {/* ================= Drawer 详情 ================= */}
+      <Drawer
+        title="Aircraft Details"
+        width={640}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
+        {currentAircraft && (
+          <>
+            <Row gutter={16}>
+              <Col span={12}><DescriptionItem title="Registration" content={currentAircraft.registrationNo} /></Col>
+              <Col span={12}><DescriptionItem title="Aircraft Type" content={currentAircraft.aircraftType} /></Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={12}><DescriptionItem title="Manufacturer" content={currentAircraft.manufacturer} /></Col>
+              <Col span={12}><DescriptionItem title="Serial Number" content={currentAircraft.serialNumber} /></Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={12}><DescriptionItem title="Status" content={currentAircraft.aircraftStatus} /></Col>
+              <Col span={12}><DescriptionItem title="Base Airport" content={currentAircraft.baseAirport} /></Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={12}><DescriptionItem title="Delivery Date" content={currentAircraft.deliveryDate} /></Col>
+              <Col span={12}><DescriptionItem title="Service Date" content={currentAircraft.inServiceDate} /></Col>
+            </Row>
+          </>
+        )}
+      </Drawer>
     </div>
   );
 };
