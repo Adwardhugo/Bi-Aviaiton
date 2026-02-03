@@ -30,4 +30,5 @@ public class AircraftController {
         PageResult<Aircraft> pageResult = aircraftService.finAll(page,pageSize,registrationNo,serialNumber,operatorCode,aircraftStatus);
         return Result.success(pageResult);
     }
+
 }

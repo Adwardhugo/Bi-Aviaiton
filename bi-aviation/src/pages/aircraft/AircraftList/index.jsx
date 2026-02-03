@@ -1,5 +1,6 @@
 import React,{ useState ,useEffect}from 'react'
-import { Form, Input, Select, Button, Space, Tag, Drawer, Row, Col} from 'antd';
+import {formatDateTime} from '../../../utils/date';
+import { Form, Input, Select, Button, Space, Tag, Drawer, Row, Col,Divider} from 'antd';
 import CommonTable from '../../../components/Table';
 import { useNavigate } from 'react-router-dom';
 import { fetchAircraftList } from '../../../apis/aircraft';
@@ -11,12 +12,13 @@ const { Option } = Select;
 
 
 /* ================= 详情字段组件 ================= */
-const DescriptionItem = ({ title, content }) => (
+const DescriptionItem = ({ label, value }) => (
   <div style={{ marginBottom: 12 }}>
-    <strong>{title}:</strong>
-    <span>{content ?? '-'}</span>
+    <span style={{ color: '#8c8c8c', marginRight: 8 }}>{label}:</span>
+    <span style={{ fontWeight: 500 }}>{value ?? '-'}</span>
   </div>
 );
+
 /* ================= 页面组件 ================= */
 const AircraftList = () => {
   const navigate = useNavigate();
@@ -229,31 +231,86 @@ const AircraftList = () => {
       {/* ================= Drawer 详情 ================= */}
       <Drawer
         title="Aircraft Details"
-        width={640}
+        width={720}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       >
         {currentAircraft && (
           <>
-            <Row gutter={16}>
-              <Col span={12}><DescriptionItem title="Registration" content={currentAircraft.registrationNo} /></Col>
-              <Col span={12}><DescriptionItem title="Aircraft Type" content={currentAircraft.aircraftType} /></Col>
+            {/* ================= Basic Info ================= */}
+            <Divider orientation="left">Basic Information</Divider>
+            <Row gutter={24}>
+              <Col span={12}>
+                <DescriptionItem label="Registration" value={currentAircraft.registrationNo} />
+              </Col>
+              <Col span={12}>
+                <DescriptionItem label="Aircraft Type" value={currentAircraft.aircraftType} />
+              </Col>
+              <Col span={12}>
+                <DescriptionItem label="Manufacturer" value={currentAircraft.manufacturer} />
+              </Col>
+              <Col span={12}>
+                <DescriptionItem label="Serial Number" value={currentAircraft.serialNumber} />
+              </Col>
             </Row>
-            <Row gutter={16}>
-              <Col span={12}><DescriptionItem title="Manufacturer" content={currentAircraft.manufacturer} /></Col>
-              <Col span={12}><DescriptionItem title="Serial Number" content={currentAircraft.serialNumber} /></Col>
+
+            {/* ================= Status / Operation ================= */}
+            <Divider orientation="left">Operation Status</Divider>
+            <Row gutter={24}>
+              <Col span={12}>
+                <DescriptionItem label="Status" value={currentAircraft.aircraftStatus} />
+              </Col>
+              <Col span={12}>
+                <DescriptionItem label="Operator Code" value={currentAircraft.operatorCode} />
+              </Col>
+              <Col span={12}>
+                <DescriptionItem label="Base Airport" value={currentAircraft.baseAirport} />
+              </Col>
+              <Col span={12}>
+                <DescriptionItem label="Seat Capacity" value={currentAircraft.seatCapacity} />
+              </Col>
             </Row>
-            <Row gutter={16}>
-              <Col span={12}><DescriptionItem title="Status" content={currentAircraft.aircraftStatus} /></Col>
-              <Col span={12}><DescriptionItem title="Base Airport" content={currentAircraft.baseAirport} /></Col>
+
+            {/* ================= Dates ================= */}
+            <Divider orientation="left">Service Dates</Divider>
+            <Row gutter={24}>
+              <Col span={12}>
+                <DescriptionItem label="Delivery Date" value={currentAircraft.deliveryDate} />
+              </Col>
+              <Col span={12}>
+                <DescriptionItem label="In Service Date" value={currentAircraft.inServiceDate} />
+              </Col>
             </Row>
-            <Row gutter={16}>
-              <Col span={12}><DescriptionItem title="Delivery Date" content={currentAircraft.deliveryDate} /></Col>
-              <Col span={12}><DescriptionItem title="Service Date" content={currentAircraft.inServiceDate} /></Col>
+
+            {/* ================= Technical ================= */}
+            <Divider orientation="left">Technical Parameters</Divider>
+            <Row gutter={24}>
+              <Col span={12}>
+                <DescriptionItem
+                  label="Max Takeoff Weight"
+                  value={
+                    currentAircraft.maxTakeoffWeight
+                      ? `${currentAircraft.maxTakeoffWeight} t`
+                      : '-'
+                  }
+                />
+              </Col>
+            </Row>
+
+            {/* ================= System Info ================= */}
+            <Divider orientation="left">System Info</Divider>
+            <Row gutter={24}>
+              <Col span={12}>
+                <DescriptionItem label="Created At" value={formatDateTime(currentAircraft.createdAt)} />
+              </Col>
+              <Col span={12}>
+                <DescriptionItem label="Updated At" value={formatDateTime(currentAircraft.updatedAt)} />
+              </Col>
             </Row>
           </>
         )}
       </Drawer>
+
     </div>
   );
 };

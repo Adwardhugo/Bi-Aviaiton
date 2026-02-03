@@ -1,49 +1,61 @@
-import React,{ useState }from 'react'
+import React,{ useState,useEffect}from 'react'
 import { Form, Input, Select, Button, Space, Tag } from 'antd';
 import CommonTable from '../../../components/Table';
-import { useNavigate } from 'react-router-dom';
+import { fetchAircraftMaintenanceList } from '../../../apis/aircraft';
 import './index.css';
 const { Option } = Select;
 
+/* ================= 详情字段组件 ================= */
+const DescriptionItem = ({ label, value }) => (
+  <div style={{ marginBottom: 12 }}>
+    <span style={{ color: '#8c8c8c', marginRight: 8 }}>{label}:</span>
+    <span style={{ fontWeight: 500 }}>{value ?? '-'}</span>
+  </div>
+);
+
 /* ================= 页面组件 ================= */
 const AircraftMaintenance = () => {
-  const navigate = useNavigate();
-  const [form] = Form.useForm();
-
-  // 跳转逻辑
-  const handleAdd = () => {
-    navigate('/maintenance/add');
+    const [form] = Form.useForm();
+  
+  /* ================= 状态管理state ================= */
+    const [maintenceDataSource, setMaintenceDataSource] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [pagination, setPagination] = useState({
+      current: 1,
+      pageSize: 10,
+      total: 0,
+    });
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const[currentAircraft,setCurrentAircraft]=useState(null);
+    const statusColorMap = {
+    PLANNED: 'orange',
+    IN_PROGRESS: 'blue',
+    COMPLETED: 'green',
   };
-  const handleTask = record => {
-    navigate(`/maintenance/task/${record.id}`);
-  };
-  const handleResult = record => {
-    navigate(`/maintenance/detail/${record.id}`);
-  };
-
+  
   // 表格列配置
   const columns = [
     {
       title: 'Registration',
-      dataIndex: 'registration_no',
+      dataIndex: 'registrationNo',
     },
     {
       title: 'Maintenance Type',
-      dataIndex: 'maintenance_type',
+      dataIndex: 'maintenanceType',
     },
     {
       title: 'Maintenance Reason',
-      dataIndex: 'maintenance_reason',
+      dataIndex: 'maintenanceReason',
     },
     {
       title: 'Maintenance Time',
-      dataIndex: 'maintenance_time',
+      dataIndex: 'plannedStartTime',
     },
     {
       title: 'Status',
-      dataIndex: 'status',
+      dataIndex: 'planStatus',
       render: status => (
-        <Tag color={status === 'MAINTENANCE' ? 'orange' : 'green'}>
+        <Tag color={statusColorMap[status] || 'default'}>
           {status}
         </Tag>
       ),
@@ -59,46 +71,86 @@ const AircraftMaintenance = () => {
       ),
     },
   ];
+  
 
-
-  /* 模拟数据 */
-  const data = [
-    {
-      id: 1,
-      registration_no: 'B-1001',
-      maintenance_type: 'C-check',
-      maintenance_reason: 'Schedule heavy maintenance',
-      maintenance_time: '2018-03-15',
-      status: 'MAINTENANCE',
-    },
-    {
-      id: 2,
-      registration_no: 'B-1002',
-      maintenance_type: 'C-check',
-      maintenance_reason: 'Under maintenance',
-      maintenance_time: '2018-03-15',
-      status: 'MAINTENANCE',
-    },
-  ];
-  const [dataSource, setDataSource] = useState(data);
+  // /* 模拟数据 */
+  // const data = [
+  //   {
+  //     id: 1,
+  //     registration_no: 'B-1001',
+  //     maintenance_type: 'C-check',
+  //     maintenance_reason: 'Schedule heavy maintenance',
+  //     maintenance_time: '2018-03-15',
+  //     status: 'MAINTENANCE',
+  //   },
+  //   {
+  //     id: 2,
+  //     registration_no: 'B-1002',
+  //     maintenance_type: 'C-check',
+  //     maintenance_reason: 'Under maintenance',
+  //     maintenance_time: '2018-03-15',
+  //     status: 'MAINTENANCE',
+  //   },
+  // ];
 
   //查询
-  const handleSearch = values => {
-    const {registration,type,status} = values;
-    const filteredData = data.filter(item => {
-      return (
-        (!registration || item.registration_no.includes(registration)) &&
-        (!type || item.maintenance_type === type) &&
-        (!status || item.status === status)
-      );
-    });
-    setDataSource(filteredData);
-  }
+  
+/* ================= 后端拉取数据 ================= */
+  const fetchList = async (params = {}, page = pagination.current, pageSize = pagination.pageSize) => {
+    setLoading(true);
+    try {
+      const res = await fetchAircraftMaintenanceList({
+        page,
+        size: pageSize,
+        ...params,
+      });
+      console.log('res =', res);
+      setMaintenceDataSource(res.data.rows);
+      setPagination(prev => ({
+        ...prev,
+        total: res.data.total,
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+ /* ================= 页面首次加载 ================= */
+  useEffect(() => {
+    fetchList();
+    
+  }, [pagination.current, pagination.pageSize]);
 
-    /* 重置 */
+
+    /* ================= 搜索 ================= */
+  const handleSearch = values => {
+    setPagination(prev => ({ ...prev, current: 1 }));
+    fetchList(values);
+  };
+    /* ================= 重置 ================= */
   const handleReset = () => {
     form.resetFields();
-    setDataSource(data);
+    setPagination(prev => ({ ...prev, current: 1 }));
+    fetchList();
+  };
+  /* ================= 分页变化 ================= */
+  const handleTableChange = (pagination) => {
+    const {current, pageSize} = pagination;
+    setPagination(prev => ({
+      ...prev,
+      current,
+      pageSize,
+    }));
+
+    fetchList(form.getFieldsValue(), current, pageSize);
+  };
+  /* ================= Result ================= */
+  const handleResult = (record) => {
+    setCurrentAircraft(record);
+    setDrawerOpen(true);
+  }
+/* ================= Result ================= */
+  const handleAdd = () => {
+  setCurrentAircraft(null);
   };
   return (
     <div className="maintenance-page">
@@ -109,17 +161,18 @@ const AircraftMaintenance = () => {
         onFinish={handleSearch}
         className="search-form"
       >
-        <Form.Item name="registration" label="Registration">
+        <Form.Item name="registrationNo" label="Registration">
           <Input placeholder="Enter keyword" allowClear />
         </Form.Item>
 
-        <Form.Item name="type" label="Type">
+        <Form.Item name="maintenanceType" label="Type">
           <Input placeholder="Enter keyword" allowClear />
         </Form.Item>
 
-        <Form.Item name="status" label="Status">
+        <Form.Item name="planStatus" label="Status">
           <Select placeholder="Select" allowClear style={{ width: 160 }}>
-            <Option value="MAINTENANCE">Maintenance</Option>
+            <Option value="IN_PROGRESS">In Progress</Option>
+            <Option value="PLANNED">Planned</Option>
             <Option value="COMPLETED">Completed</Option>
           </Select>
         </Form.Item>
@@ -137,17 +190,19 @@ const AircraftMaintenance = () => {
 
       {/* ================= Add 按钮区域 ================= */}
       <Button className = 'add-bar' type="primary" onClick={handleAdd}>Add</Button>
-
       {/* ================= 表格区域 ================= */}
-        
       <CommonTable
         columns={columns}
-        dataSource={dataSource}
-        rowKey="id"
+        dataSource={maintenceDataSource}
+        loading={loading}
+        rowKey="planId"
         pagination={{
-          pageSize: 10,
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
           showSizeChanger: true,
         }}
+        onChange={handleTableChange}
       />
     </div>
   );
