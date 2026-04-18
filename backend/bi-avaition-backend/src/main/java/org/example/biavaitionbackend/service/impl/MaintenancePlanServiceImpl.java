@@ -1,15 +1,16 @@
 package org.example.biavaitionbackend.service.impl;
 
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.example.biavaitionbackend.dto.CreateMaintenancePlanDTO;
 import org.example.biavaitionbackend.dto.MaintenancePlanDTO;
+import org.example.biavaitionbackend.mapper.AircraftMapper;
 import org.example.biavaitionbackend.mapper.MaintenancePlanMapper;
-import org.example.biavaitionbackend.pojo.MaintenancePlan;
 import org.example.biavaitionbackend.pojo.PageResult;
 import org.example.biavaitionbackend.service.MaintenancePlanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,6 +19,8 @@ public class MaintenancePlanServiceImpl implements MaintenancePlanService {
 
     @Autowired
     private MaintenancePlanMapper maintenancePlanMapper;
+    @Autowired
+    private AircraftMapper aircraftMapper;
 
     @Override
     public PageResult<MaintenancePlanDTO> page(
@@ -47,6 +50,15 @@ public class MaintenancePlanServiceImpl implements MaintenancePlanService {
                 pageInfo.getTotal(),
                 pageInfo.getList()
         );
+    }
+    @Transactional
+    @Override
+    public void create(CreateMaintenancePlanDTO dto) {
+
+        maintenancePlanMapper.insert(dto);
+
+        aircraftMapper.updateStatus(dto.getAircraftId(), "MAINTENANCE");
+
     }
 }
 

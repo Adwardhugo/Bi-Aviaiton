@@ -4,6 +4,32 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.example.biavaitionbackend.mapper.MaintenancePlanMapper">
+    <insert id="insert"
+            parameterType="org.example.biavaitionbackend.dto.CreateMaintenancePlanDTO">
+        INSERT INTO maintenance_plan (
+            aircraft_id,
+            maintenance_type,
+            maintenance_reason,
+            planned_start_time,
+            planned_end_time,
+            plan_status,
+            created_by,
+            created_at,
+            updated_at
+        )
+        VALUES (
+                   #{aircraftId},
+                   #{maintenanceType},
+                   #{maintenanceReason},
+                   #{plannedStartTime},
+                   #{plannedEndTime},
+                   #{planStatus},
+                   #{createdBy},
+                   NOW(),
+                   NOW()
+               )
+
+    </insert>
 
     <select id="selectMaintenancePage" resultType="org.example.biavaitionbackend.dto.MaintenancePlanDTO">
         SELECT
@@ -21,22 +47,7 @@
         JOIN aircraft a
         ON mp.aircraft_id = a.aircraft_id
 
-        <where>
-            <!-- 只展示处于维修相关状态的飞机 -->
-            a.aircraft_status IN ('MAINTENANCE', 'GROUNDED')
 
-            <if test="registrationNo != null and registrationNo != ''">
-                AND a.registration_no LIKE CONCAT('%', #{registrationNo}, '%')
-            </if>
-
-            <if test="maintenanceType != null and maintenanceType != ''">
-                AND mp.maintenance_type = #{maintenanceType}
-            </if>
-
-            <if test="planStatus != null and planStatus != ''">
-                AND mp.plan_status = #{planStatus}
-            </if>
-        </where>
 
         ORDER BY mp.planned_start_time DESC
 

@@ -1,7 +1,7 @@
 package org.example.biavaitionbackend.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Param;
 import org.example.biavaitionbackend.pojo.Aircraft;
 
 import java.util.List;
@@ -13,4 +13,7 @@ public interface AircraftMapper {
                                    String serialNumber,
                                    String operatorCode,
                                    String aircraftStatus);
+
+    int updateStatus(@Param("aircraftId") Long aircraftId,
+                     @Param("status") String status);
 }

@@ -35,6 +35,9 @@
   margin-bottom: 8px;
   border-radius: 4px;
 }
+.add-bar.ant-btn-primary {
+  background-color:#1677ff;
+}
 
 /* 表格容器 */
 .maintenance-page .ant-table-wrapper {

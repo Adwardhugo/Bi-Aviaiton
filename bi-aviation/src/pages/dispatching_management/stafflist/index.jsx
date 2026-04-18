@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect} from 'react';
 import { Form, Input, Select, Button, Space, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import CommonTable from '../../../components/Table';
+import { fetchStaffList } from '../../../apis/staff';
 import './index.css';
 
 const { Option } = Select;
@@ -10,34 +11,26 @@ const { Option } = Select;
 const StaffList = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
+  const [dataSource, setDataSource] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   /* ===== 跳转 ===== */
   const handleDetail = record => {
-    navigate(`/staff/detail/${record.id}`);
+    navigate(`/dispatch/staff/${record.staffId}`);
   };
 
   /* ===== 表格列 ===== */
   const columns = [
-    {
-      title: 'Name',
-      dataIndex: 'name',
-    },
-    {
-      title: 'Department',
-      dataIndex: 'department',
-    },
-    {
-      title: 'Role',
-      dataIndex: 'role',
-    },
-    {
-      title: 'Staff ID',
-      dataIndex: 'staff_id',
-    },
-    {
-      title: 'Contact',
-      dataIndex: 'staff_contact',
-    },
+    { title: 'Name', dataIndex: 'name' },
+    { title: 'Department', dataIndex: 'department' },
+    { title: 'Role', dataIndex: 'role' },
+    { title: 'Staff ID', dataIndex: 'staffId' },
+    { title: 'Contact', dataIndex: 'contact' },
     {
       title: 'Status',
       dataIndex: 'status',
@@ -52,75 +45,85 @@ const StaffList = () => {
     },
     {
       title: 'Operation',
-      key: 'operation',
       render: (_, record) => (
-        <a onClick={() => handleDetail(record)}>Details</a>
+        <a onClick={() => navigate(`/staff/detail/${record.staffId}`)}>
+          Details
+        </a>
       ),
     },
   ];
-
   /* ===== 模拟数据 ===== */
-  const data = [
-    {
-      id: 1,
-      name: 'Mike',
-      department: 'Cabin Crew',
-      role: '001',
-      staff_id: '111111',
-      staff_contact: '02233451233',
-      status: 'WORKING',
-    },
-    {
-      id: 2,
-      name: 'Edward',
-      department: 'Maintenance',
-      role: '001',
-      staff_id: '222222',
-      staff_contact: '02233451233',
-      status: 'ON_STANDBY',
-    },
-    {
-      id: 3,
-      name: 'Nancy',
-      department: 'Ground Operations',
-      role: '001',
-      staff_id: '333333',
-      staff_contact: '02233451233',
-      status: 'ON_LEAVE',
-    },
-    {
-      id: 4,
-      name: 'Rose',
-      department: 'Administration',
-      role: '001',
-      staff_id: '444444',
-      staff_contact: '02233451233',
-      status: 'WORKING',
-    },
-  ];
+  // const data = [
+  //   {
+  //     id: 1,
+  //     name: 'Mike',
+  //     department: 'Cabin Crew',
+  //     role: '001',
+  //     staff_id: '111111',
+  //     staff_contact: '02233451233',
+  //     status: 'WORKING',
+  //   },
+  //   {
+  //     id: 2,
+  //     name: 'Edward',
+  //     department: 'Maintenance',
+  //     role: '001',
+  //     staff_id: '222222',
+  //     staff_contact: '02233451233',
+  //     status: 'ON_STANDBY',
+  //   },
+  //   {
+  //     id: 3,
+  //     name: 'Nancy',
+  //     department: 'Ground Operations',
+  //     role: '001',
+  //     staff_id: '333333',
+  //     staff_contact: '02233451233',
+  //     status: 'ON_LEAVE',
+  //   },
+  //   {
+  //     id: 4,
+  //     name: 'Rose',
+  //     department: 'Administration',
+  //     role: '001',
+  //     staff_id: '444444',
+  //     staff_contact: '02233451233',
+  //     status: 'WORKING',
+  //   },
+  // ];
 
-  const [dataSource, setDataSource] = useState(data);
-
+  /* ================= 后端拉取数据 ================= */
+  const fetchList = async (params = {}, page = pagination.current, pageSize = pagination.pageSize) => {
+    setLoading(true);
+    try {
+      const res = await fetchStaffList({
+        page,
+        size: pageSize,
+        ...params,
+      });
+      console.log('res =', res);
+      setDataSource(res.data.rows);
+      setPagination(prev => ({
+        ...prev,
+        total: res.data.total,
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+  /* ================= 页面首次加载 ================= */
+  useEffect(() => {
+    fetchList({}, 1, 10);
+  }, []);
+  
   /* ===== 搜索 ===== */
   const handleSearch = values => {
-    const { name, depart, role, status } = values;
-
-    const filtered = data.filter(item => {
-      return (
-        (!name || item.name.includes(name)) &&
-        (!depart || item.department === depart) &&
-        (!role || item.role.includes(role)) &&
-        (!status || item.status === status)
-      );
-    });
-
-    setDataSource(filtered);
+    fetchList(values, 1, pagination.pageSize);
   };
-
-  /* ===== 重置 ===== */
+ /* ===== 重制 ===== */
   const handleReset = () => {
     form.resetFields();
-    setDataSource(data);
+    fetchList({}, 1, pagination.pageSize);
   };
 
   return (
@@ -136,7 +139,7 @@ const StaffList = () => {
           <Input placeholder="Enter keyword" allowClear />
         </Form.Item>
 
-        <Form.Item name="depart" label="Depart">
+        <Form.Item name="department" label="Depart">
           <Select placeholder="Select" allowClear style={{ width: 180 }}>
             <Option value="Cabin Crew">Cabin Crew</Option>
             <Option value="Maintenance">Maintenance</Option>
@@ -147,7 +150,10 @@ const StaffList = () => {
 
         <Form.Item name="role" label="Role">
           <Select placeholder="Select" allowClear style={{ width: 160 }}>
-            <Option value="001">001</Option>
+            <Option value="Admin Officer">Admin Officer</Option>
+            <Option value="Ground Staff">Ground Staff</Option>
+            <Option value="Engineer">Engineer</Option>
+            <Option value="Cabin Crew">Cabin Crew</Option>
           </Select>
         </Form.Item>
 
@@ -162,9 +168,9 @@ const StaffList = () => {
         <Form.Item className="form-actions">
           <Space>
             <Button type="primary" htmlType="submit">
-              搜索
+              Search
             </Button>
-            <Button onClick={handleReset}>重置</Button>
+            <Button onClick={handleReset}>Reset</Button>
           </Space>
         </Form.Item>
       </Form>
@@ -173,10 +179,11 @@ const StaffList = () => {
       <CommonTable
         columns={columns}
         dataSource={dataSource}
-        rowKey="id"
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
+        rowKey="staffId"
+        loading={loading}
+        pagination={pagination}
+        onChange={(pager) => {
+          fetchList(form.getFieldsValue(), pager.current, pager.pageSize);
         }}
       />
     </div>

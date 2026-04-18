@@ -4,6 +4,11 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.example.biavaitionbackend.mapper.AircraftMapper">
+    <update id="updateStatus">
+        UPDATE aircraft
+        SET aircraft_status = #{status}
+        WHERE aircraft_id = #{aircraftId}
+    </update>
 
     <select id="findAll" resultType="org.example.biavaitionbackend.pojo.Aircraft">
         SELECT aircraft.*

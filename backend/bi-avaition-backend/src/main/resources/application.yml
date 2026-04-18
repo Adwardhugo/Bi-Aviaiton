@@ -3,10 +3,10 @@ spring:
     name: bi-aviation
 
   datasource:
-    url: jdbc:mysql://localhost:3306/aircraft?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/aircraft?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Pacific/Auckland
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: 950915ggg
+    password: 123456
 
 mybatis:
   configuration:

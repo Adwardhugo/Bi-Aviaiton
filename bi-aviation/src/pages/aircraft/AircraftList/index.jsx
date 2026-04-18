@@ -21,7 +21,6 @@ const DescriptionItem = ({ label, value }) => (
 
 /* ================= 页面组件 ================= */
 const AircraftList = () => {
-  const navigate = useNavigate();
   const [form] = Form.useForm();
 
 /* ================= 状态管理state ================= */

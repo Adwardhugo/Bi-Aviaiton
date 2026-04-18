@@ -20,10 +20,6 @@ const router = createBrowserRouter([
         path: "aircraft/list",
         element: <AircraftList />
       },
-      // {
-      //   path: "aircraft/detail/:id",
-      //   element: <AircraftDetail />,
-      // },
       {
         path: "aircraft/maintenance",
         element: <AircraftMaintenance />

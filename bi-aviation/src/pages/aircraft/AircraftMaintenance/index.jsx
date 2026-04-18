@@ -1,17 +1,12 @@
 import React,{ useState,useEffect}from 'react'
-import { Form, Input, Select, Button, Space, Tag } from 'antd';
+import { Form, Input, Select, Button, Space, Tag,Drawer,DatePicker } from 'antd';
 import CommonTable from '../../../components/Table';
 import { fetchAircraftMaintenanceList } from '../../../apis/aircraft';
+import { createMaintenancePlan } from '../../../apis/maintenance_plan';
+import { fetchTaskByPlanId } from '../../../apis/taskDetails';
 import './index.css';
 const { Option } = Select;
 
-/* ================= 详情字段组件 ================= */
-const DescriptionItem = ({ label, value }) => (
-  <div style={{ marginBottom: 12 }}>
-    <span style={{ color: '#8c8c8c', marginRight: 8 }}>{label}:</span>
-    <span style={{ fontWeight: 500 }}>{value ?? '-'}</span>
-  </div>
-);
 
 /* ================= 页面组件 ================= */
 const AircraftMaintenance = () => {
@@ -25,13 +20,17 @@ const AircraftMaintenance = () => {
       pageSize: 10,
       total: 0,
     });
-    const [drawerOpen, setDrawerOpen] = useState(false);
-    const[currentAircraft,setCurrentAircraft]=useState(null);
+
     const statusColorMap = {
     PLANNED: 'orange',
     IN_PROGRESS: 'blue',
     COMPLETED: 'green',
   };
+    const[planForm]=Form.useForm();
+    const[planDrawerOpen,setPlanDrawerOpen]=useState(false);
+    const[taskVisible,setTaskVisible]=useState(false);
+    const[taskData,setTaskData]=useState([]);
+    const[currentPlanId,setCurrentPlanId]=useState(null);
   
   // 表格列配置
   const columns = [
@@ -66,12 +65,36 @@ const AircraftMaintenance = () => {
       render: (_, record) => (
         <Space>
           <a onClick={() => handleTask(record)}>Task</a>
-          <a onClick={() => handleResult(record)}>Result</a>
         </Space>
       ),
     },
   ];
-  
+  //Task详情列配置
+  const taskColumns = [
+  { title: 'Task ID', dataIndex: 'taskId' },
+  { title: 'Plan ID', dataIndex: 'planId' },
+  { title: 'Aircraft ID', dataIndex: 'aircraftId' },
+  { title: 'Task Name', dataIndex: 'taskName' },
+  { title: 'Task Type', dataIndex: 'taskType' },
+  { title: 'Actual Start', dataIndex: 'actualStartTime' },
+  { title: 'Actual End', dataIndex: 'actualEndTime' },
+  {
+    title: 'Status',
+    dataIndex: 'taskStatus',
+    render: status => {
+      const colorMap = {
+        PLANNED: 'orange',
+        IN_PROGRESS: 'blue',
+        COMPLETED: 'green',
+      };
+      return <Tag color={colorMap[status]}>{status}</Tag>;
+    },
+  },
+  { title: 'Engineer ID', dataIndex: 'engineerId' },
+  { title: 'Remark', dataIndex: 'remark' },
+  { title: 'Created At', dataIndex: 'createdAt' },
+  { title: 'Updated At', dataIndex: 'updatedAt' },
+];
 
   // /* 模拟数据 */
   // const data = [
@@ -116,8 +139,7 @@ const AircraftMaintenance = () => {
   };
  /* ================= 页面首次加载 ================= */
   useEffect(() => {
-    fetchList();
-    
+    fetchList(form.getFieldsValue());
   }, [pagination.current, pagination.pageSize]);
 
 
@@ -143,15 +165,21 @@ const AircraftMaintenance = () => {
 
     fetchList(form.getFieldsValue(), current, pageSize);
   };
-  /* ================= Result ================= */
-  const handleResult = (record) => {
-    setCurrentAircraft(record);
-    setDrawerOpen(true);
+
+  /* ================= Task ================= */
+  const handleTask = async (record) => {
+    const planId = record.planId;
+    setCurrentPlanId(record.planId);
+    const res = await fetchTaskByPlanId({planId});
+    setTaskData(res.data);
+    setTaskVisible(true);
   }
-/* ================= Result ================= */
+/* ================= Add================= */
   const handleAdd = () => {
-  setCurrentAircraft(null);
-  };
+  planForm.resetFields();
+  setPlanDrawerOpen(true);
+};
+
   return (
     <div className="maintenance-page">
       {/* ================= 查询区域 ================= */}
@@ -204,6 +232,135 @@ const AircraftMaintenance = () => {
         }}
         onChange={handleTableChange}
       />
+      {/* ================= Add plan Drawer ================= */}
+      <Drawer
+      title="Create Maintenance Plan"
+      width={600}
+      open={planDrawerOpen}
+      onClose={() => setPlanDrawerOpen(false)}
+      destroyOnClose
+      >
+      <Form
+        form={planForm}
+        layout="vertical"
+        onFinish={async (values) => {
+          const payload = {
+            ...values,
+            plannedStartTime: values.plannedStartTime
+              ? values.plannedStartTime.format('YYYY-MM-DDTHH:mm:ss')
+              : null,
+            plannedEndTime: values.plannedEndTime
+              ? values.plannedEndTime.format('YYYY-MM-DDTHH:mm:ss')
+              : null,
+            createdBy: 'admin', // 可以后续从登录用户获取
+          };
+
+          await createMaintenancePlan(payload);
+
+          setPlanDrawerOpen(false);
+          planForm.resetFields();
+          fetchList();
+        }}
+      >
+
+        {/* Aircraft ID */}
+        <Form.Item
+          label="Aircraft ID"
+          name="aircraftId"
+          rules={[{ required: true, message: 'Please input aircraft id' }]}
+        >
+          <Input placeholder="Enter aircraft id" />
+        </Form.Item>
+
+        {/* Maintenance Type */}
+        <Form.Item
+          label="Maintenance Type"
+          name="maintenanceType"
+          rules={[{ required: true, message: 'Please select maintenance type' }]}
+        >
+          <Select placeholder="Select maintenance type">
+            <Option value="A_CHECK">A-Check</Option>
+            <Option value="B_CHECK">B-Check</Option>
+            <Option value="C_CHECK">C-Check</Option>
+            <Option value="D_CHECK">D-Check</Option>
+          </Select>
+        </Form.Item>
+
+        {/* Maintenance Reason */}
+        <Form.Item
+          label="Maintenance Reason"
+          name="maintenanceReason"
+          rules={[{ required: true, message: 'Please input maintenance reason' }]}
+        >
+          <Input.TextArea rows={3} placeholder="Enter maintenance reason" />
+        </Form.Item>
+
+        {/* Planned Start Time */}
+        <Form.Item
+          label="Planned Start Time"
+          name="plannedStartTime"
+          rules={[{ required: true, message: 'Please select start time' }]}
+        >
+          <DatePicker
+            showTime
+            style={{ width: '100%' }}
+          />
+        </Form.Item>
+
+        {/* Planned End Time */}
+        <Form.Item
+          label="Planned End Time"
+          name="plannedEndTime"
+          rules={[{ required: true, message: 'Please select end time' }]}
+        >
+          <DatePicker
+            showTime
+            style={{ width: '100%' }}
+          />
+        </Form.Item>
+
+        {/* Plan Status */}
+        <Form.Item
+          label="Plan Status"
+          name="planStatus"
+          rules={[{ required: true, message: 'Please select status' }]}
+        >
+          <Select placeholder="Select status">
+            <Option value="PLANNED">Planned</Option>
+            <Option value="IN_PROGRESS">In Progress</Option>
+            <Option value="COMPLETED">Completed</Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item>
+          <Space>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+            <Button onClick={() => setPlanDrawerOpen(false)}>
+              Cancel
+            </Button>
+          </Space>
+        </Form.Item>
+
+      </Form>
+      </Drawer>
+      {/* ================= Task Drawer ================= */}
+      <Drawer
+        title={`Task Detail - Plan ${currentPlanId}`}
+        width={1000}
+        open={taskVisible}
+        onClose={() => setTaskVisible(false)}
+      >
+        <CommonTable
+          rowKey="taskId"
+          columns={taskColumns}
+          dataSource={taskData}
+          scroll={{ x: 1400 }}
+        />
+      </Drawer>
+
+
     </div>
   );
 };
